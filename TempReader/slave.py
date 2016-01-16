@@ -11,7 +11,7 @@ else:
 
 def read_temperature(sensor_id):
     # Open the file that we viewed earlier so that python can see what is in it. Replace the serial number as before.
-    tfile = open(config.path.format(sensor_id=sensor_id))
+    tfile = open("{0}/{1}/w1_slave".format(config.sensorPath, sensor_id))
     # Read all of the text in the file.
     text = tfile.read()
     # Close the file now that the text has been read.
@@ -27,7 +27,10 @@ def read_temperature(sensor_id):
 
 
 def get_sensors(limit=100):
-    return [{"id": sensor_id, "temperature": read_temperature(sensor_id)} for sensor_id in config.sensor_ids][:limit]
+    sensor_ids = os.listdir(config.sensorPath)
+    return [{"id": sensor_id, "temperature": read_temperature(sensor_id)}
+            for sensor_id in sensor_ids
+            if os.path.isfile("{0}/{1}/w1_slave".format(config.sensorPath, sensor_id))][:limit]
 
 
 def get_sensor(sensor_id):

@@ -11,7 +11,7 @@ paths:
   /sensors:
     get:
       tags: [Sensors]
-      operationId: app.get_sensors
+      operationId: slave.get_sensors
       summary: Get temperature readings from all sensors
       responses:
         200:
@@ -23,7 +23,7 @@ paths:
   /sensors/{sensor_id}:
     get:
       tags: [Sensors]
-      operationId: app.get_sensor
+      operationId: slave.get_sensor
       summary: Get a single temperatures readering
       parameters:
         - $ref: '#/parameters/sensor_id'
