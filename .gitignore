@@ -1,6 +1,6 @@
 /TempLogger/.project
 /TempLogger/.pydevproject
 .idea
-RaspberryPi.iml
+*.iml
 *.csv
 *.pyc

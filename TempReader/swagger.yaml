@@ -1,0 +1,62 @@
+swagger: '2.0'
+info:
+  title: Temperature Reader API
+  version: "0.1"
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /sensors:
+    get:
+      tags: [Sensors]
+      operationId: app.get_sensors
+      summary: Get temperature readings from all sensors
+      responses:
+        200:
+          description: Return temperature readings
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Sensor'
+  /sensors/{sensor_id}:
+    get:
+      tags: [Sensors]
+      operationId: app.get_sensor
+      summary: Get a single temperatures readering
+      parameters:
+        - $ref: '#/parameters/sensor_id'
+      responses:
+        200:
+          description: Return pet
+          schema:
+            $ref: '#/definitions/Sensor'
+        404:
+          description: Pet does not exist
+
+parameters:
+  sensor_id:
+    name: sensor_id
+    description: Sensors's Unique identifier
+    in: path
+    type: string
+    required: true
+    pattern: "^[a-zA-Z0-9-]+$"
+
+definitions:
+  Sensor:
+    type: object
+    required:
+      - id
+      - temperature
+    properties:
+      id:
+        type: string
+        description: Unique identifier
+        example: "28-0315a47057ff"
+        readOnly: true
+      temperature:
+        type: number
+        description: The temperature
+        example: "19.234"
