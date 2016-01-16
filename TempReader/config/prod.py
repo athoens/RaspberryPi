@@ -1,2 +1,2 @@
-path = "/sys/bus/w1/devices"
+sensorPath = "/sys/bus/w1/devices"
 port = 80
