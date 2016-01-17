@@ -33,7 +33,7 @@ paths:
           schema:
             $ref: '#/definitions/Sensor'
         404:
-          description: Pet does not exist
+          description: Sensor does not exist
 
 parameters:
   sensor_id:
