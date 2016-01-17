@@ -2,7 +2,7 @@
 import logging
 import connexion
 import json
-import urllib2
+import urllib.request
 import os
 
 if os.environ.get('ENVIRONMENT', 'DEV') == 'PROD':
@@ -12,8 +12,9 @@ else:
 
 
 def read_slave(host):
-    data = json.load(urllib2.urlopen('http://{0}/sensors'.format(host)))
-    return data
+    response = urllib.request.urlopen('http://{0}/sensors'.format(host))
+    response_text = response.read().decode()
+    return json.loads(response_text)
 
 
 def get_sensors():
