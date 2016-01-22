@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import logging
 import connexion
-
+import pathlib
 import os
+
 if os.environ.get('ENVIRONMENT', 'DEV') == 'PROD':
     from config import prod as config  # config/prod.py
 else:
@@ -10,6 +11,7 @@ else:
 
 
 def read_temperature(sensor_id):
+    logging.debug("Reading sensor %s", sensor_id)
     # Open the file that we viewed earlier so that python can see what is in it. Replace the serial number as before.
     tfile = open("{0}/{1}/w1_slave".format(config.sensorPath, sensor_id))
     # Read all of the text in the file.
@@ -41,10 +43,9 @@ def get_sensor(sensor_id):
 #    return pet or ('Not found', 404)
 
 
-
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename="slave.log", filemode='w', level=logging.DEBUG)
 app = connexion.App(__name__)
-app.add_api('swagger-slave.yaml')
+app.add_api(pathlib.Path('swagger-slave.yaml'))
 # set the WSGI application callable to allow using uWSGI:
 # uwsgi --http :8080 -w app
 application = app.app

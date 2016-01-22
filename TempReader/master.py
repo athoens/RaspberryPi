@@ -3,6 +3,7 @@ import logging
 import connexion
 import json
 import urllib.request
+import pathlib
 import os
 
 if os.environ.get('ENVIRONMENT', 'DEV') == 'PROD':
@@ -33,7 +34,7 @@ def get_sensor():
 
 logging.basicConfig(level=logging.INFO)
 app = connexion.App(__name__)
-app.add_api('swagger-master.yaml')
+app.add_api(pathlib.Path('swagger-master.yaml'))
 # set the WSGI application callable to allow using uWSGI:
 # uwsgi --http :8080 -w app
 application = app.app
