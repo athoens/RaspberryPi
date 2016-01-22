@@ -3,7 +3,10 @@ import logging
 import connexion
 import json
 import urllib.request
+import pathlib
 import os
+
+outsideTemperatureUrl = "http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&APPID={apiKey}"
 
 if os.environ.get('ENVIRONMENT', 'DEV') == 'PROD':
     from config import prod as config  # config/prod.py
@@ -17,13 +20,33 @@ def read_slave(host):
     return json.loads(response_text)
 
 
+def readOutsideTemp():
+    try:
+        response = urllib.request.urlopen(outsideTemperatureUrl.format(lat=config.openWeatherMapLat, lon=config.openWeatherMapLong, apiKey=config.openWeatherMapApiKey))
+        response_text = response.read().decode()
+        return float(json.loads(response_text)["main"]["temp"])
+    except Exception:
+        return "?"
+
+
 def get_sensors():
     result = []
+    # Read sensor of all slaves
     for slave in config.slaves:
         result += read_slave(slave)
+
+    # Read outside temperature
+    if config.openWeatherMapApiKey is not None:
+        result += [{
+            "id": "outside",
+            "temperature": readOutsideTemp()
+        }]
+
+    # Add names to sensor if present
     for sensor in result:
         if sensor["id"] in config.sensor_info:
             sensor["name"] = config.sensor_info[sensor["id"]]["name"]
+
     return result
 
 
@@ -33,7 +56,7 @@ def get_sensor():
 
 logging.basicConfig(level=logging.INFO)
 app = connexion.App(__name__)
-app.add_api('swagger-master.yaml')
+app.add_api(pathlib.Path('swagger-master.yaml'))
 # set the WSGI application callable to allow using uWSGI:
 # uwsgi --http :8080 -w app
 application = app.app
