@@ -3,6 +3,7 @@ import logging
 import connexion
 import json
 import urllib.request
+import urllib.error
 import pathlib
 import os
 
@@ -30,24 +31,31 @@ def readOutsideTemp():
 
 
 def get_sensors():
-    result = []
+    readings = {}
     # Read sensor of all slaves
     for slave in config.slaves:
-        result += read_slave(slave)
+        try:
+            readings.update(read_slave(slave))
+        except urllib.error.URLError:
+            logging.warning("Could not read slave <%s>", slave, exc_info=True)
 
     # Read outside temperature
     if config.openWeatherMapApiKey is not None:
-        result += [{
-            "id": "outside",
+        readings["outside"] = {
             "temperature": readOutsideTemp()
-        }]
+        }
 
     # Add names to sensor if present
-    for sensor in result:
-        if sensor["id"] in config.sensor_info:
-            sensor["name"] = config.sensor_info[sensor["id"]]["name"]
+    results = {}
+    for sensor_id, sensor_metadata in config.sensor_info.items():
+        result = sensor_metadata.copy()
+        if sensor_id in readings:
+            result.update(readings[sensor_id])
+        else:
+            result["temperature"] = "?"
+        results[sensor_id] = result
 
-    return result
+    return results
 
 
 def get_sensor():

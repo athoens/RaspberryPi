@@ -30,15 +30,17 @@ def read_temperature(sensor_id):
 
 def get_sensors(limit=100):
     sensor_ids = os.listdir(config.sensorPath)
-    return [{"id": sensor_id, "temperature": read_temperature(sensor_id)}
-            for sensor_id in sensor_ids
-            if os.path.isfile("{0}/{1}/w1_slave".format(config.sensorPath, sensor_id))][:limit]
+    result = {}
+    for sensor_id in sensor_ids:
+        result[sensor_id] = {"temperature": read_temperature(sensor_id)}
+    return result
 
 
 def get_sensor(sensor_id):
     return {
-        "id": sensor_id,
-        "temperature": read_temperature(sensor_id)
+        sensor_id: {
+            "temperature": read_temperature(sensor_id)
+        }
     }
 #    return pet or ('Not found', 404)
 

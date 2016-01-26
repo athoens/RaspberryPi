@@ -3,7 +3,7 @@
 import os
 
 sensorPath = "testdata"
-slaves = ["192.168.2.210:8090", "192.168.2.211:8090"]
+slaves = ["localhost:8090"]
 sensor_info = {
     "28-0000067a9b24": {
         "name": "Raumtemperatur Wohnzimmer"
