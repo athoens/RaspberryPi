@@ -20,6 +20,18 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Sensor'
+  /sensors/history:
+    get:
+      tags: [Sensors]
+      operationId: master.get_sensor_history
+      summary: Get the history for a specific day
+      responses:
+        200:
+          description: Return history
+          schema:
+            $ref: '#/definitions/Sensor'
+        404:
+          description: No history exists for the given day
   /sensors/{sensor_id}:
     get:
       tags: [Sensors]
@@ -29,11 +41,21 @@ paths:
         - $ref: '#/parameters/sensor_id'
       responses:
         200:
-          description: Return pet
+          description: Return reading
           schema:
             $ref: '#/definitions/Sensor'
         404:
           description: Sensor does not exist
+  /collect:
+      get:
+        tags: [Sensors]
+        operationId: master.get_collect
+        summary: Do a single reading
+        responses:
+          200:
+            description: Reading was successfull
+          500:
+            description: Reading failed
 
 parameters:
   sensor_id:
@@ -43,6 +65,12 @@ parameters:
     type: string
     required: true
     pattern: "^[a-zA-Z0-9-]+$"
+  history_day:
+    name: history_day
+    description: A day
+    in: path
+    type: string
+    required: true
 
 definitions:
   Sensor:
