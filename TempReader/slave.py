@@ -3,11 +3,14 @@ import logging
 import connexion
 import pathlib
 import os
+import threading
 
 if os.environ.get('ENVIRONMENT', 'DEV') == 'PROD':
     from config import prod as config  # config/prod.py
 else:
     from config import dev as config  # config/dev.py
+
+sensor_lock = threading.Lock()
 
 
 def read_temperature(sensor_id):
@@ -28,13 +31,14 @@ def read_temperature(sensor_id):
     return temperature / 1000
 
 
-def get_sensors(limit=100):
-    sensor_ids = os.listdir(config.sensorPath)
-    result = {}
-    for sensor_id in sensor_ids:
-        if os.path.isfile("{0}/{1}/w1_slave".format(config.sensorPath, sensor_id)):
-            result[sensor_id] = {"temperature": read_temperature(sensor_id)}
-    return result
+def get_sensors():
+    with sensor_lock:
+        sensor_ids = os.listdir(config.sensorPath)
+        result = {}
+        for sensor_id in sensor_ids:
+            if os.path.isfile("{0}/{1}/w1_slave".format(config.sensorPath, sensor_id)):
+                result[sensor_id] = {"temperature": read_temperature(sensor_id)}
+        return result
 
 
 def get_sensor(sensor_id):

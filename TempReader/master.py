@@ -8,6 +8,7 @@ import os
 import threading
 import datetime
 import calendar
+import copy
 
 import connexion
 import collections
@@ -15,6 +16,8 @@ import collections
 outsideTemperatureUrl = "http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&APPID={apiKey}"
 headers = {"Access-Control-Allow-Origin": "*"}
 data = collections.OrderedDict()
+history_lock = threading.Lock()
+
 
 if os.environ.get('ENVIRONMENT', 'DEV') == 'PROD':
     from config import prod as config  # config/prod.py
@@ -70,7 +73,9 @@ def get_sensors():
 
 
 def get_sensor_history():
-    return data, 200, headers
+    with history_lock:
+        data_copy = copy.deepcopy(data)
+    return data_copy, 200, headers
 
 
 def get_collect():
@@ -87,12 +92,13 @@ def do_collect():
     reading = do_reading()
     now = datetime.datetime.utcnow()
     current_time = int(calendar.timegm(now.utctimetuple()) + now.microsecond * 1e-6) * 1000
-    for sensor_id, new_data in reading.items():
-        sensor_data = data.get(sensor_id, [])
-        sensor_data.append([current_time, new_data["temperature"]])
-        while len(sensor_data) > config.maxHistoryLength:
-            sensor_data.pop(0)
-        data[sensor_id] = sensor_data
+    with history_lock:
+        for sensor_id, new_data in reading.items():
+            sensor_data = data.get(sensor_id, [])
+            sensor_data.append([current_time, new_data["temperature"]])
+            while len(sensor_data) > config.maxHistoryLength:
+                sensor_data.pop(0)
+            data[sensor_id] = sensor_data
 
 
 def collect_timer():
@@ -103,7 +109,7 @@ def collect_timer():
         t2.start()
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename="master.log", filemode='w', level=logging.DEBUG)
 
 do_collect()
 app = connexion.App(__name__)
