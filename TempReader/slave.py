@@ -59,4 +59,4 @@ application = app.app
 
 if __name__ == '__main__':
     # run our standalone gevent server
-    app.run(port=config.slavePort, server='gevent')
+    app.run(port=config.slavePort, server='tornado')

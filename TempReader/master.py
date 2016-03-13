@@ -122,5 +122,5 @@ if __name__ == '__main__':
     # run our standalone gevent server
     t = threading.Timer(config.collectInterval, collect_timer)
     t.start()
-    app.run(port=config.masterPort, server='gevent')
+    app.run(port=config.masterPort, server='tornado')
 
