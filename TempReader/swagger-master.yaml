@@ -32,20 +32,6 @@ paths:
             $ref: '#/definitions/Sensor'
         404:
           description: No history exists for the given day
-  /sensors/{sensor_id}:
-    get:
-      tags: [Sensors]
-      operationId: master.get_sensor
-      summary: Get a single temperatures readering
-      parameters:
-        - $ref: '#/parameters/sensor_id'
-      responses:
-        200:
-          description: Return reading
-          schema:
-            $ref: '#/definitions/Sensor'
-        404:
-          description: Sensor does not exist
   /collect:
       get:
         tags: [Sensors]

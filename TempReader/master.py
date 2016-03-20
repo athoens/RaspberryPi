@@ -9,6 +9,7 @@ import threading
 import datetime
 import calendar
 import copy
+import time
 
 import connexion
 import collections
@@ -41,6 +42,7 @@ def read_outside_temp():
 
 
 def do_reading():
+    logging.debug("Sensor reading started")
     readings = {}
     # Read sensor of all slaves
     for slave in config.slaves:
@@ -54,21 +56,14 @@ def do_reading():
         readings["outside"] = {
             "temperature": read_outside_temp()
         }
-
-    # Add names to sensor if present
-    results = {}
-    for sensor_id, sensor_metadata in config.sensor_info.items():
-        result = sensor_metadata.copy()
-        if sensor_id in readings:
-            result.update(readings[sensor_id])
-        else:
-            result["temperature"] = "?"
-        results[sensor_id] = result
+    logging.debug("Sensor reading completed")
     return readings
 
 
 def get_sensors():
+    logging.debug("Sensors request starting")
     results = do_reading()
+    logging.debug("Sensors request completed")
     return results, 200, headers
 
 
@@ -79,15 +74,7 @@ def get_sensor_history():
 
 
 def get_collect():
-    do_collect()
-    return {}
-
-
-def get_sensor():
-    return 'Not found', 404
-
-
-def do_collect():
+    logging.info("Collect request starting")
     global data
     reading = do_reading()
     now = datetime.datetime.utcnow()
@@ -99,19 +86,24 @@ def do_collect():
             while len(sensor_data) > config.maxHistoryLength:
                 sensor_data.pop(0)
             data[sensor_id] = sensor_data
+    logging.info("Collect request completed")
+    return {}
 
 
-def collect_timer():
-    try:
-        urllib.request.urlopen('http://127.0.0.1:{}/collect'.format(config.masterPort))
-    finally:
-        t2 = threading.Timer(config.collectInterval, collect_timer)
-        t2.start()
+def collect_thread():
+    while True:
+        try:
+            logging.debug("Collect thread starting")
+            urllib.request.urlopen('http://127.0.0.1:{}/collect'.format(config.masterPort))
+            logging.debug("Collect thread finished")
+        except Exception:
+            logging.error("Error in collect thread", exc_info=True)
+        time.sleep(config.collectInterval)
 
 
-logging.basicConfig(filename="master.log", filemode='w', level=logging.DEBUG)
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(filename="master.log", filemode='w', level=logging.DEBUG, format=FORMAT)
 
-do_collect()
 app = connexion.App(__name__)
 app.add_api(pathlib.Path('swagger-master.yaml'))
 # set the WSGI application callable to allow using uWSGI:
@@ -119,8 +111,7 @@ app.add_api(pathlib.Path('swagger-master.yaml'))
 application = app.app
 
 if __name__ == '__main__':
-    # run our standalone gevent server
-    t = threading.Timer(config.collectInterval, collect_timer)
+    t = threading.Thread(target=collect_thread, daemon=True)
     t.start()
     app.run(port=config.masterPort, server='tornado')
 

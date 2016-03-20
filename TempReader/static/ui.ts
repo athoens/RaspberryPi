@@ -6,31 +6,38 @@ $(function () {
     var sensor_info = {
         "28-0000067a9b24": {
             "name": "Raumtemperatur Wohnzimmer",
-            "color": "#FF0000"
+            "color": "#FF0000",
+            "yaxis": 1
         },
         "28-0415a4658dff": {
             "name": "Zufluss Wohnzimmer",
-            "color": "#AF0000"
+            "color": "#CF0000",
+            "yaxis": 2
         },
         "28-0415a40bafff": {
-            "name": "Abfluss Wohnzimmer",
-            "color": "#6F0000"
+            "name": "Heizkörper Wohnzimmer",
+            "color": "#9F0000",
+            "yaxis": 2
         },
         "28-0415a463d4ff": {
             "name": "Raumtemperatur Kinderzimmer",
-            "color": "#00FF00"
+            "color": "#00FF00",
+            "yaxis": 1
         },
         "28-0415a40a21ff": {
             "name": "Zufluss Kinderzimmer",
-            "color": "#00AF00"
+            "color": "#00CF00",
+            "yaxis": 2
         },
         "28-0315a47057ff": {
             "name": "Heizkörper Kinderzimmer",
-            "color": "#006F00"
+            "color": "#009F00",
+            "yaxis": 2
         },
         "outside": {
             "name": "Außentemperatur",
-            "color": "#0000FF"
+            "color": "#0000FF",
+            "yaxis": 2
         }
     };
 
@@ -46,7 +53,7 @@ $(function () {
             timezone: "browser",
             timeformat: "%H:%M"
         }],
-        yaxes: [{}, {position: "right"}],
+        yaxes: [{position: "right"}, {position: "left"}],
         legend: {
             show: false
         },
@@ -79,7 +86,7 @@ $(function () {
             cleanUp(data);
             array_values.push({
                 data: data,
-                yaxis: sensor == "28-0000067a9b24" || sensor == "28-0415a463d4ff" ? 1 : 2,
+                yaxis: sensor_info[sensor].yaxis,
                 label: sensor_info[sensor].name,
                 color: sensor_info[sensor].color,
             });
@@ -89,7 +96,7 @@ $(function () {
     }
 
     function load() {
-        $.get("http://192.168.2.210/sensors", (newData) => {
+        $.get("/sensors", (newData) => {
             var time = Date.now();
             for (var sensor in newData) {
                 series[sensor].push([time, newData[sensor].temperature]);
@@ -121,7 +128,7 @@ $(function () {
     });
 
 
-    $.get("http://192.168.2.210/sensors/history", function (data) {
+    $.get("/sensors/history", function (data) {
         series = data;
         $.plot($("#placeholder"), valuesAsArray(series), options);
     });
