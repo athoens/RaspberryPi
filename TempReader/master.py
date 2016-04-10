@@ -27,14 +27,15 @@ else:
 
 
 def read_slave(host):
-    response = urllib.request.urlopen('http://{0}/sensors'.format(host))
+    response = urllib.request.urlopen('http://{0}/sensors'.format(host), timeout=30)
     response_text = response.read().decode()
     return json.loads(response_text)
 
 
 def read_outside_temp():
     try:
-        response = urllib.request.urlopen(outsideTemperatureUrl.format(lat=config.openWeatherMapLat, lon=config.openWeatherMapLong, apiKey=config.openWeatherMapApiKey))
+        response = urllib.request.urlopen(outsideTemperatureUrl.format(lat=config.openWeatherMapLat, lon=config.openWeatherMapLong,
+                                                                       apiKey=config.openWeatherMapApiKey), timeout=30)
         response_text = response.read().decode()
         return float(json.loads(response_text)["main"]["temp"])
     except Exception:
@@ -94,7 +95,7 @@ def collect_thread():
     while True:
         try:
             logging.debug("Collect thread starting")
-            urllib.request.urlopen('http://127.0.0.1:{}/collect'.format(config.masterPort))
+            urllib.request.urlopen('http://127.0.0.1:{}/collect'.format(config.masterPort), 60)
             logging.debug("Collect thread finished")
         except Exception:
             logging.error("Error in collect thread", exc_info=True)
