@@ -50,7 +50,7 @@ def get_sensor(sensor_id):
 #    return pet or ('Not found', 404)
 
 
-FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
+FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(filename="slave.log", filemode='w', level=logging.DEBUG, format=FORMAT)
 app = connexion.App(__name__)
 app.add_api(pathlib.Path('swagger-slave.yaml'))
