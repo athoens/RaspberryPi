@@ -95,7 +95,7 @@ def collect_thread():
     while True:
         try:
             logging.debug("Collect thread starting")
-            urllib.request.urlopen('http://127.0.0.1:{}/collect'.format(config.masterPort), 60)
+            urllib.request.urlopen('http://127.0.0.1:{}/collect'.format(config.masterPort), timeout=60)
             logging.debug("Collect thread finished")
         except Exception:
             logging.error("Error in collect thread", exc_info=True)

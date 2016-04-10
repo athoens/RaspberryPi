@@ -1,5 +1,6 @@
 /TempLogger/.project
 /TempLogger/.pydevproject
+/TempLogger/out.txt
 .idea
 *.iml
 *.csv
