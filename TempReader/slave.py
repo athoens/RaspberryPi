@@ -21,6 +21,14 @@ def read_temperature(sensor_id):
     text = tfile.read()
     # Close the file now that the text has been read.
     tfile.close()
+
+    # Split the text with new lines (\n) and select the second line.
+    firstline = text.split("\n")[0]
+    # Split the line into words, referring to the spaces, and select the 10th word (counting from 0).
+    crcOk = firstline.split(" ")[11]
+    if crcOk != "YES":
+        return None
+
     # Split the text with new lines (\n) and select the second line.
     secondline = text.split("\n")[1]
     # Split the line into words, referring to the spaces, and select the 10th word (counting from 0).
@@ -37,7 +45,9 @@ def get_sensors():
         result = {}
         for sensor_id in sensor_ids:
             if os.path.isfile("{0}/{1}/w1_slave".format(config.sensorPath, sensor_id)):
-                result[sensor_id] = {"temperature": read_temperature(sensor_id)}
+                temperature = read_temperature(sensor_id)
+                if temperature and temperature>-20 and temperature<90:
+                    result[sensor_id] = {"temperature": temperature}
         return result
 
 
